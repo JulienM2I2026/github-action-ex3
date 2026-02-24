@@ -18,7 +18,7 @@ function App() {
           <img src={gitlabLogo} className="logo" alt="GitLab logo" />
         </a>
       </div>
-      <h1>GitLab CI/CD</h1>
+      <h1>Learn GitLab</h1>
       <div className="card">
         <h2>Welcome to the GitLab CI/CD world.</h2>
         <p>

@@ -10,7 +10,7 @@ env:
   DOCKER_IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/demo-website-ex3
 
 jobs:
-  build:
+  packaging:
     runs-on: ubuntu-latest
     permissions:
       contents: read

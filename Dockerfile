@@ -2,16 +2,14 @@ FROM node:24-alpine AS builder
 
 WORKDIR /src
 
-ADD package*.json .
-
+COPY package*.json ./
 RUN npm install
 
-ADD . .
+COPY . .
+RUN npm run build
 
-CMD npm run build 
+FROM nginx:alpine
 
-FROM nginx:alpine 
-
-COPY --from=builder build/* /usr/share/nginx/html
+COPY --from=builder /src/build /usr/share/nginx/html
 
 CMD ["nginx", "-g", "daemon off;"]

@@ -63,6 +63,9 @@ jobs:
     needs: packaging
 
     steps:
+      - name: Set lowercase image name
+        run: echo "DOCKER_IMAGE_NAME=ghcr.io/${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
+
       - name: Déploiement sur Azure
         uses: appleboy/ssh-action@v1
         with:
@@ -70,9 +73,11 @@ jobs:
           username: ${{ secrets.VM_USERNAME }}
           key: ${{ secrets.VM_SSH_KEY }}
           script: |
+            IMAGE_NAME=$(echo ghcr.io/${GITHUB_REPOSITORY,,})
+
             echo ${{ secrets.GH_ACTIONS_EX03 }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-            docker pull ${{ env.DOCKER_IMAGE_NAME }}:latest
+            docker pull $IMAGE_NAME:latest
 
             docker stop demo-website || true
             docker rm demo-website || true
@@ -81,4 +86,4 @@ jobs:
               -p 80:80 \
               --name demo-website \
               --restart always \
-              ${{ env.DOCKER_IMAGE_NAME }}:latest
+              $IMAGE_NAME:latest

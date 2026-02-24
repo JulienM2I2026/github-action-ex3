@@ -1,0 +1,57 @@
+.node-cache:
+  cache:
+    paths:
+      - node_modules/
+    key: ${CI_COMMIT_SHORT_SHA}-node-dependencies
+
+default:
+  tags:
+    - docker
+    - local
+
+stages:
+  - build
+  - verify-build
+  - verify-cache
+  - unit-tests
+
+build-app:
+  extends: .node-cache
+  stage: build
+  image: node:24-alpine
+  artifacts:
+    paths:
+      - build/
+  script:
+    - npm ci
+    - npm run build
+
+verify-build:
+  stage: verify-build
+  image: alpine
+  dependencies:
+    - build-app
+  script:
+    - test -f build/index.html
+    - cat build/index.html | grep 'id="root"'
+
+verify-cache:
+  extends: .node-cache
+  stage: verify-cache
+  image: alpine
+  dependencies: []
+  script:
+    - ls node_modules/
+
+unit-tests:
+  extends: .node-cache
+  stage: unit-tests
+  image: node:24-alpine
+  artifacts:
+    paths:
+      - reports/html/
+    reports:
+      junit: reports/junit.xml
+  script:
+    - npm ci
+    - npm run test

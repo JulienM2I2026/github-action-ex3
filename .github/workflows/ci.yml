@@ -53,8 +53,6 @@ jobs:
       - name: Packaging de l'application
         run: | 
           docker build -t $DOCKER_IMAGE_NAME:latest .
-          docker build -t $DOCKER_IMAGE_NAME:$GITHUB_SHA .
       
       - name: Publication de l'image sur le GHCR
         run: docker push -a $DOCKER_IMAGE_NAME
-

@@ -44,7 +44,7 @@ jobs:
           name: rapports-html
           path: ./reports/html/
       - name: Convertir le nom de l'image en minuscule
-        run: echo "DOCKER_IMAGE_NAME=$(echo $DOCKER_IMAGE_NAME | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+        run: echo "DOCKER_IMAGE_NAME=ghcr.io/${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
       - name: Connexion au registre d'image de conteneur de Github
         run: echo ${{ secrets.GH_ACTIONS_EX03 }} | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
         
@@ -58,32 +58,3 @@ jobs:
       - name: Publication de l'image sur le GHCR
         run: docker push -a $DOCKER_IMAGE_NAME
 
-  deployment:
-    runs-on: ubuntu-latest
-    needs: packaging
-
-    steps:
-      - name: Set lowercase image name
-        run: echo "DOCKER_IMAGE_NAME=ghcr.io/${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
-
-      - name: Déploiement sur Azure
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.VM_HOST }}
-          username: ${{ secrets.VM_USERNAME }}
-          key: ${{ secrets.VM_SSH_KEY }}
-          script: |
-            IMAGE_NAME=$(echo ghcr.io/${GITHUB_REPOSITORY,,})
-
-            echo ${{ secrets.GH_ACTIONS_EX03 }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-            docker pull $IMAGE_NAME:$GITHUB_SHA
-
-            docker stop demo-website || true
-            docker rm demo-website || true
-
-            docker run -d \
-              -p 80:80 \
-              --name demo-website \
-              --restart always \
-              $IMAGE_NAME:latest

@@ -46,7 +46,7 @@ jobs:
       - name: Convertir le nom de l'image en minuscule
         run: echo "DOCKER_IMAGE_NAME=$(echo $DOCKER_IMAGE_NAME | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
       - name: Connexion au registre d'image de conteneur de Github
-        run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
+        run: echo ${{ secrets.GH_ACTIONS_EX03 }} | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
         
         # run: docker login ghcr.io -u $GITHUB_ACTOR -p ${{ secrets.GHCR_PAT_BIS }}
 

@@ -48,10 +48,13 @@ jobs:
         
         # run: docker login ghcr.io -u $GITHUB_ACTOR -p ${{ secrets.GHCR_PAT_BIS }}
 
+      - name: Convertir le nom de l'image en minuscule
+        run: echo "DOCKER_IMAGE_NAME=$(echo $DOCKER_IMAGE_NAME | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
       - name: Packaging de l'application
         run: | 
-          docker build -t julienm2i2026:latest .
-          docker build -t julienm2i2026:$GITHUB_SHA .
+          docker build -t DOCKER_IMAGE_NAME:latest .
+          docker build -t DOCKER_IMAGE_NAME:$GITHUB_SHA .
       
       - name: Publication de l'image sur le GHCR
-        run: docker push -a julienm2i2026
+        run: docker push -a DOCKER_IMAGE_NAME

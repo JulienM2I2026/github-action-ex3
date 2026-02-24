@@ -1,0 +1,57 @@
+name: Demo Workflow Node.js
+
+on: 
+  push:
+    branches: ["main", "master"]
+  workflow_dispatch:
+
+env:
+  # Nom de l'image: <emplacement du registre d'image de conteneur>/<nom du registre>/<nom de l'image>
+  DOCKER_IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/demo-website-ex3
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Récupération du code source
+        uses: actions/checkout@v6
+
+      - name: Installation de Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24.13.1'
+          cache: 'npm'
+
+      - name: Installation des dépendances
+        run: npm ci
+
+      - name: Compile le projet
+        run: npm run build
+
+      - name: Vérification de la compilation
+        run: | 
+          test -f build/index.html
+          cat build/index.html | grep '<div id="root"></div>'
+      - name: Test Unitaire
+        run: npm run test
+      - name: Upload des rapports de test
+        uses: actions/upload-artifact@v4
+        with:
+          name: rapports-html
+          path: ./reports/html/
+      - name: Connexion au registre d'image de conteneur de Github
+        run: echo ${{ secrets.GH_ACTIONS_EX03 }} | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
+        
+        # run: docker login ghcr.io -u $GITHUB_ACTOR -p ${{ secrets.GHCR_PAT_BIS }}
+
+      - name: Packaging de l'application
+        run: | 
+          docker build -t $DOCKER_IMAGE_NAME:latest .
+          docker build -t $DOCKER_IMAGE_NAME:$GITHUB_SHA .
+      
+      - name: Publication de l'image sur le GHCR
+        run: docker push -a $DOCKER_IMAGE_NAME
